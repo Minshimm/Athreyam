@@ -4,7 +4,7 @@ import backImage from '../assets/Images/in5.png'
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useState } from 'react';
-import { registerAPI } from '../Services/allApi';
+import { loginAPI, registerAPI, mergeCartAPI } from '../Services/allApi';
 
 function Auth() {
   const [show, setShow] = useState(false);
@@ -48,13 +48,48 @@ function Auth() {
     }
   }
 
-  const handleSignIn = () => {
-     // Clear any previous session data
-  sessionStorage.clear();
-    // Simulating a role response from backend
-    const role = 'admin'; // Replace this with dynamic data from backend API response
-    sessionStorage.setItem('role', role); // Store role in sessionStorage for role-based routing
-    window.location.href = role === 'admin' ? '/admin/dashboard' : '/';
+  const handleSignIn = async () => {
+  
+    console.log(userDetails)
+    const {email,password} = userDetails;
+  if(!email || !password){
+    alert("Plz Fill Fields")
+  }
+  else{
+    try{
+       // API fetching
+       const response = await loginAPI(userDetails);
+       console.log(response);
+       if(response.status==200){
+        const { currentUser, token } = response.data;
+        sessionStorage.setItem('userId', currentUser._id);
+        sessionStorage.setItem("username", currentUser.username);
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("role", currentUser.role);
+        sessionStorage.setItem("email",currentUser.email)
+        sessionStorage.setItem("password",currentUser.password)
+        sessionStorage.setItem("address",currentUser.address)
+        sessionStorage.setItem("phone",currentUser.phone)
+        // Merge guest cart with user's cart
+      const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
+      if (guestCart.length > 0) {
+        await mergeCartAPI(currentUser._id, guestCart);
+        localStorage.removeItem("guestCart"); // Clear guest cart after merging
+      }
+        alert("Login Successfull")
+        navigate(currentUser.role === 'admin' ? '/admin/dashboard' : '/');
+       }
+       else{
+        console.log("error");
+        
+        alert("User Not Registered")
+       }
+    }
+    catch(err){
+      console.log(err);
+      
+    }
+  }
   };
 
   return (
@@ -80,7 +115,7 @@ function Auth() {
             <label for="floatingInput">Password</label>
             </div> 
               <div>
-              <button className='btn text-light' style={{backgroundColor:'#53633f'}} onClick={handleSignIn}>Sign In</button>
+              <button className='btn text-light' style={{backgroundColor:'#53633f'}} type='button' onClick={handleSignIn}>Sign In</button>
               <p className='my-3 text-dark '>New to Here ? <Link to={'/register'}><a href="" className='text-danger fw-bold' onClick={handleShow}>Register Now</a> </Link></p>              
             </div>
             </form>         

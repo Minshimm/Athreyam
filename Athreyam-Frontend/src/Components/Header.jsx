@@ -9,7 +9,7 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { FcSearch } from "react-icons/fc";
 import { IoHome } from "react-icons/io5";
-import { Link, useLocation } from 'react-router-dom';
+import { Link} from 'react-router-dom';
 import { useCart} from '../Context/CartContext'
 
 function Header() {
@@ -19,14 +19,13 @@ function Header() {
     const [searchText, setSearchText] = useState('');
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All Categories');
-   
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const dropdownRef = useRef(null);
   
     const categories = ['All Categories', 'Yoga', 'Farm Fresh Veggies', 'Consultation'];
-    const location = useLocation(); // Get the current location (path)
+    
 
-    // Check if the current path is an admin path
-    const isAdminPath = location.pathname.startsWith("/admin");
+    const role = sessionStorage.getItem('role'); 
   
     const handleCategorySelect = (category) => {
       setSelectedCategory(category); // Update selected category
@@ -44,6 +43,11 @@ function Header() {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
           setDropdownVisible(false); // Close the dropdown
         }
+        if (sessionStorage.getItem("token")) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
       };
   
       document.addEventListener('mousedown', handleClickOutside);
@@ -54,6 +58,13 @@ function Header() {
       };
     }, []);
   
+    const handleSignOut = ()=>{
+      sessionStorage.clear(); // Clear sessionStorage
+      setIsAuthenticated(false); // Update state
+      alert("You have signed out successfully!");
+      window.location.reload();
+    }
+   
   return (
     <div>
          <Navbar expand="lg" className="bg-white" style={{ padding: '0px',position: 'relative' }}>
@@ -62,7 +73,7 @@ function Header() {
             <img src={Heading} alt="" width={'250px'} />
           </Navbar.Brand>
       {/* Search Bar */}
-      <div
+      {/* <div
         ref={dropdownRef}
         style={{
           position: 'relative', // Ensures dropdown positions correctly
@@ -73,9 +84,9 @@ function Header() {
           width: '400px',
           color: 'black'
         }}
-      >
+      > */}
         {/* Dropdown Toggle */}
-        <div
+        {/* <div
           onClick={() => setDropdownVisible(!dropdownVisible)}
           style={{
             padding: '10px',
@@ -85,10 +96,10 @@ function Header() {
           }}
         >
           {selectedCategory} ▾
-        </div>
+        </div> */}
 
         {/* Dropdown Options */}
-        {dropdownVisible && (
+        {/* {dropdownVisible && (
           <div
             style={{
               position: 'absolute',
@@ -115,10 +126,10 @@ function Header() {
               </div>
             ))}
           </div>
-        )}
+        )} */}
 
         {/* Input Box */}
-        <input
+        {/* <input
           type="text"
           value={searchText}
           onChange={(e) => {
@@ -132,10 +143,10 @@ function Header() {
             outline: 'none',
             padding: '10px',
           }}
-        />
+        /> */}
 
         {/* Search Button */}
-        <button
+        {/* <button
           onClick={handleSearch}
           style={{
             padding: '10px',
@@ -146,15 +157,16 @@ function Header() {
         >
           <FcSearch />
         </button>
-      </div>
-       <Link to="/" className='mt-3 text-center' style={{ color: 'green', textDecoration:'none'}}>
+      </div> */}
+     <div className='d-flex'>
+     <Link to="/" className='mt-3 text-center me-3' style={{ color: 'green', textDecoration:'none'}}>
       <IoHome className='fs-4'/><p style={{fontSize: 'small'}}>Home</p>
        </Link>
-       <Link to="/login" className='mt-3 text-center text-dark' style={{  textDecoration:'none'}}><SiGnuprivacyguard className='fs-4'/><p style={{fontSize: 'small'}}>SignIn/SignUp</p>
+       <Link to="/login" className='mt-3 text-center text-dark me-3' style={{  textDecoration:'none'}}><SiGnuprivacyguard className='fs-4'/><p style={{fontSize: 'small'}}>SignIn/SignUp</p>
        </Link>
-       <Link to={'/contactus'} className='mt-3 text-center text-dark' style={{ textDecoration:'none'}}><BiSolidContact className='fs-4'/><p style={{fontSize: 'small'}}>Contact Us</p>
+       <Link to={'/contactus'} className='mt-3 text-center text-dark me-3' style={{ textDecoration:'none'}}><BiSolidContact className='fs-4'/><p style={{fontSize: 'small'}}>Contact Us</p>
        </Link>
-       <Link to={'/cart'} className='mt-3 text-center text-dark' style={{textDecoration:'none',position: "relative"}}>
+       <Link to={'/cart'} className='mt-3 text-center text-dark ' style={{textDecoration:'none',position: "relative"}}>
        <FaCartPlus className='fs-4'/><p style={{fontSize: 'small'}}>Cart</p>
         {/* Cart Count Badge */}
       {totalItems > 0 && (
@@ -175,6 +187,7 @@ function Header() {
         </span>
       )}
        </Link>
+     </div>
        </Container>
       </Navbar>
       <Navbar expand="lg" collapseOnSelect className="bg-body-tertiary shadow text-dark position-sticky z-1" >
@@ -184,6 +197,7 @@ function Header() {
           <Nav className="me-auto ">
             <Nav.Link href='/aboutus' className='text-black'>AboutUs</Nav.Link>
             <Nav.Link href='/pharmacy' className='text-black'>Herbal Pharmacy</Nav.Link>
+            <Nav.Link href='/room-booking' className='text-black'>Resort Booking</Nav.Link>
             <NavDropdown title="Fecilities">
               
               <NavDropdown.Item href='/holistic-living' className='text-dark  '>Living</NavDropdown.Item>
@@ -202,14 +216,37 @@ function Header() {
               <NavDropdown.Item href="" className='text-dark'>Annadhanam</NavDropdown.Item>
             </NavDropdown>
              {/* Admin Pages */}
-      {isAdminPath && (
+      {role === 'admin' && (
         <>
           <Link to="/admin/dashboard" style={{textDecoration:'none'}} className='text-dark mt-2 mx-2'>Admin Dashboard</Link>
           <Link to="/admin/manage-medicines" style={{textDecoration:'none'}} className='text-dark mt-2 mx-2'>Manage Medicines</Link>
           <Link to="/admin/manage-booking" style={{textDecoration:'none'}} className='text-dark mt-2 mx-2'>Manage Booking</Link>
         </>
       )}
-          </Nav>
+      </Nav>
+      <Nav className="ms-auto">
+        
+        <Link to={'/'}>
+        {isAuthenticated && (
+        <button
+          onClick={handleSignOut}
+          className="btn ms-auto"
+          style={{
+            fontWeight: "bold",
+            borderRadius: "5px",
+            padding: "8px 15px",
+            backgroundColor: "#53633f",
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          SignOut
+        </button>
+      )}
+        </Link>
+      
+      </Nav>
+        
         </Navbar.Collapse>
       </Container>
     </Navbar>

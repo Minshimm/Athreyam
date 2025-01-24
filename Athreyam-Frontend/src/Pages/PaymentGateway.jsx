@@ -1,90 +1,90 @@
-import React, { useState } from 'react'
-import CardPayment from '../Components/CardPayment';
-import Upi from '../Components/Upi';
+import React from 'react';
+import { createRazorpayOrderAPI, verifyRazorpayPaymentAPI } from '../Services/allApi'
+import { useCart } from '../Context/CartContext';
+import { updateStockAfterOrderAPI } from '../Services/allApi'
+import { useNavigate } from 'react-router-dom';
 
-const bankUrls = {
-    hdfc: "https://netbanking.hdfcbank.com/netbanking/",
-    icici: "https://www.icicibank.com/Personal-Banking/insta-banking/internet-banking/index.page",
-    sbi: "https://retail.onlinesbi.sbi/retail/login.htm",
-    axis: "https://retail.axisbank.co.in/",
-  };
 function PaymentGateway() {
-    const [paymentMethod, setPaymentMethod] = useState("");
-    const [selectedBank, setSelectedBank] = useState("");
-   
-    const handlePayment = () => {
-        alert(`Payment through ${paymentMethod} was successful!`);
+  const { cartItems, removeFromCart } = useCart();
+ const navigate = useNavigate();
+  const handleRazorpayPayment = async () => {
+    try {
+      // Ensure Razorpay is loaded
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK not loaded. Please refresh the page.");
+      }
+  
+      // Calculate total amount
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.medicinePrice * item.quantity,
+        0
+      );
+  
+      // Create Razorpay order
+      const { data } = await createRazorpayOrderAPI({ amount: totalAmount })
+  
+      const options = {
+        key: 'rzp_test_NXw9ecJZciw1N9', 
+        amount: data.amount,
+        currency: 'INR',
+        name: 'Athreay Reaserch Foundtion',
+        description: 'Payment for medicines',
+        order_id: data.id,
+        handler: async (response) => {
+          const paymentData = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          };
+  
+          // Verify payment on the server
+          const verificationResponse = await verifyRazorpayPaymentAPI(paymentData)
+  
+          if (verificationResponse.data.message === 'Payment verified successfully') {
+            alert('Payment Successful!');
+            await updateStockAfterOrderAPI(cartItems);
+            cartItems.forEach((item) => removeFromCart(item.id)); // Clear the cart
+            navigate('/');
+          } 
+          else {
+            alert('Payment verification failed. Please try again.');
+          }
+        },
+        prefill: {
+          name: sessionStorage.getItem('username'),
+          email: sessionStorage.getItem('email'),
+          contact: sessionStorage.getItem('phone'),
+        },
+        theme: {
+          color: '#53633f',
+        },
       };
-    const handleBankSelection = (bank) => {
-        setSelectedBank(bank);
-        if (bankUrls[bank]) {
-          window.location.href = bankUrls[bank]; // Redirect to the actual bank login page
-        }
-      };
+  
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error('Error during payment:', error);
+      alert(error.message || 'Something went wrong. Please try again.');
+    }
+  };
   return (
     <div>
-    <div className="row bg-white">
-       <div className='col-6 text-dark fs-4'>
-           <h2 className='fw-bold text-center py-5 text-uppercase' style={{letterSpacing: "5px", color: "#53633f"}}>Select Payment Method</h2>
-         <div>
-        <label className='pb-3 ps-5'>
-          <input
-            type="radio"
-            value="card"
-            checked={paymentMethod === "card"}
-            onChange={() => setPaymentMethod("card")}
-          />
-          Credit/Debit Card
-        </label>
-        <br />
-        <label className='pb-3 ps-5'>
-          <input
-            type="radio"
-            value="upi"
-            checked={paymentMethod === "upi"}
-            onChange={() => setPaymentMethod("upi")}
-          />
-          UPI
-        </label>
-        <br />
-        <label className='pb-3 ps-5'>
-          <input
-            type="radio"
-            value="netbanking"
-            checked={paymentMethod === "netbanking"}
-            onChange={() => setPaymentMethod("netbanking")}
-          />
-          Net Banking
-        </label>
+    <div className="text-center">
+        <h2>Proceed to Payment</h2>
+        <button
+          onClick={handleRazorpayPayment}
+          style={{
+            backgroundColor: '#53633f',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            border: 'none',
+          }}
+        >
+          Pay with Razorpay
+        </button>
       </div>
-   </div>
-   <div className='col-6' >
-      {/* Net Banking Options */}
-      {paymentMethod === "netbanking" && (
-        <div style={{ marginTop: "20px" }}>
-          <h4>Select Your Bank</h4>
-          <select
-            value={selectedBank}
-            onChange={(e) => handleBankSelection(e.target.value)}
-            style={{ width: "100%", padding: "10px", borderRadius: "5px" }}
-          >
-            <option value="">-- Select Bank --</option>
-            <option value="hdfc">HDFC Bank</option>
-            <option value="icici">ICICI Bank</option>
-            <option value="sbi">State Bank of India</option>
-            <option value="axis">Axis Bank</option>
-          </select>
-        </div>
-      )}
-      {/* Render Card Payment Form */}
-      {paymentMethod === "card" && (
-        <CardPayment onPay={handlePayment} />
-      )}
-
-      {/* Render UPI Payment Component */}
-      {paymentMethod === "upi" && <Upi onPay={handlePayment} />}
-    </div>
-</div>
 </div>
   )
 }

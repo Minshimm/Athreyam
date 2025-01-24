@@ -5,16 +5,18 @@ function AdminDashboard() {
   return (
     <div>
         <div className="container my-4 bg-white py-4">
-      <h1 className="text-center" style={{color:'#53633f',letterSpacing: '5px'}}>Admin Dashboard</h1>
+      <h1 className="text-center fw-bold" style={{color:'#53633f',letterSpacing: '5px'}}>Admin Dashboard</h1>
       <div className="row mt-4 ">
         {/* Dashboard Cards */}
         <div className="col-md-4">
           <div className="card shadow text-center">
             <div className="card-body">
-              <h5 className="card-title">Total Medicines</h5>
-              <p className="card-text">125</p>
+              <h5 className="card-title">Medicines</h5>
               <Link to="/admin/manage-medicines" className="btn btn-primary">
-                Manage Medicines
+                Manage
+              </Link>
+              <Link to="/admin/sold-medicines" className="btn btn-primary">
+                Sold
               </Link>
             </div>
           </div>
@@ -23,9 +25,10 @@ function AdminDashboard() {
         <div className="col-md-4">
           <div className="card shadow text-center">
             <div className="card-body">
-              <h5 className="card-title">Total Users</h5>
-              <p className="card-text">540</p>
-              <button className="btn btn-secondary">View Users</button>
+              <h5 className="card-title">Users</h5>
+              <Link to="/admin/view-users" className="btn btn-primary">
+                View Users
+              </Link>
             </div>
           </div>
         </div>
@@ -33,10 +36,12 @@ function AdminDashboard() {
         <div className="col-md-4">
           <div className="card shadow text-center">
             <div className="card-body">
-              <h5 className="card-title">Total Bookings</h5>
-              <p className="card-text">78</p>
+              <h5 className="card-title">Room Bookings</h5>
+              <Link to="/admin/manage-rooms" className="btn btn-primary">
+              Rooms
+              </Link>
               <Link to="/admin/manage-booking" className="btn btn-primary">
-              View Bookings
+              Bookings
               </Link>
             </div>
           </div>

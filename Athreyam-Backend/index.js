@@ -15,6 +15,7 @@ const athreyamApp = express();
 athreyamApp.use(cors());
 athreyamApp.use(express.json());
 athreyamApp.use(router);
+athreyamApp.use('/uploads',express.static('./uploads'));
 //4. Define PORT
 const PORT = 3000 || process.env.PORT;
 //5. Run application

@@ -14,7 +14,7 @@ import cow1 from '../assets/Images/cow1.jpg'
 import briga from '../assets/Images/brigaraj.jpeg'
 import chavana from '../assets/Images/Chavanaprash.jpeg'
 import { useNavigate } from 'react-router-dom';
-
+import athreya from '../assets/Videos/AthreyaLiving.mp4'
 function Home() {
   const [index, setIndex] = useState(0);
   const navigate = useNavigate();
@@ -23,9 +23,25 @@ function Home() {
   };
   return (
     <div className='bg-white'> 
-    <marquee behavior="loop" direction="left" style={{height:'60px'}} className='text-danger pt-3 fw-bold'>Unni Swami available @ Athreya Nochima from Dec 2nd to Dec 15th   |  Schedule your consultation please use contact icon <span style={{marginLeft:'400px'}}> Karkkidakanji Kit available on every friday with 10% Discount</span></marquee>
-       <img src={banner1} alt="" width={'100%'}  />
-          <div className="row bg-white mx-5">          
+    {/* <marquee behavior="loop" direction="left" style={{height:'60px'}} className='text-danger pt-3 fw-bold'>Unni Swami available @ Athreya Nochima from Dec 2nd to Dec 15th   |  Schedule your consultation please use contact icon <span style={{marginLeft:'400px'}}> Karkkidakanji Kit available on every friday with 10% Discount</span></marquee> */}
+       <div  style={{
+              width: "100vw", 
+              height: "450px", 
+              overflow: "hidden",
+              position: "relative", 
+            }}>
+             <video src={athreya} width={'100%'} height={'450px'} autoPlay
+              loop muted style={{
+                  width: "100%", 
+                  height: "100%", 
+                  objectFit:"fill", 
+                  position: "absolute", 
+                  top: 0,
+                  left: 0,
+                }}></video>
+              </div>
+       {/* <img src={banner1} alt="" width={'100%'}  /> */}
+          <div className="row bg-white mx-5 mt-5">          
             <div className="col-6 text-dark ">
               <h2 className='text-center fw-bold mb-3' style={{letterSpacing: '5px', color: '#53633f'}}
 >MIND . BODY . SPIRIT</h2>

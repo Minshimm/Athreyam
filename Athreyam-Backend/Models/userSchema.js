@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema({
     },
     email : {
         type : String,
-        required : true
+        required : true,
+        unique : true
     },
     password : {
         type : String,
@@ -23,6 +24,6 @@ const userSchema = new mongoose.Schema({
         required : true
     }
 })
-//model creation using collection name in the DB. here my Db name: projectfairDB & colletion name: users
+//model creation using collection name in the DB. here my Db name: AthreyamDB & colletion name: users
 const users = mongoose.model('users', userSchema)
 module.exports=users
